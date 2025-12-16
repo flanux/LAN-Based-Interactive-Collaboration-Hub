@@ -1,95 +1,151 @@
 <?php
+// api.php - Main API gateway that routes all requests
+
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Don't display errors in output
+ini_set('log_errors', 1);
+
+// Set headers before any output
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
-require_once __DIR__ .'/core/room.php';
-require_once __DIR__ .'/core/eventbus.php';
+// Catch any errors and return as JSON
+function handleError($errno, $errstr, $errfile, $errline) {
+    echo json_encode(array(
+        'success' => false,
+        'error' => 'Server error: ' . $errstr,
+        'file' => basename($errfile),
+        'line' => $errline
+    ));
+    exit;
+}
 
-$roomManager = new RoomManager();
-$eventBus = new EventBus();
+set_error_handler('handleError');
 
-$action = $_GET['action'] ?? $_POST['action'] ?? null;
+try {
+    require_once __DIR__ . '/core/room.php';
+    require_once __DIR__ . '/core/eventbus.php';
 
-$response = [];
+    // Initialize managers
+    $roomManager = new RoomManager();
+    $eventBus = new EventBus();
 
-switch ($action) {
-    case 'create_room':
-        $role = $_POST['role'] ?? 'teacher';
-        $response = $roomManager->createRoom($role);
-        break;
+    // Get action from request
+    $action = isset($_GET['action']) ? $_GET['action'] : (isset($_POST['action']) ? $_POST['action'] : null);
 
-    case 'join_room':
-        $roomId = $_POST['roomId'] ?? null;
-        $username = $_POST['username'] ??'Anonymous';
-        $role = $_POST['role'] ??'student';
+    // Response array
+    $response = array();
 
-        if ($roomId) {
-            $response = [
-                'success' => false,
-                'error' => 'Room Id is required'
-            ];
-        } else {
-            $response = $roomManager->joinRoom($roomId, $username, $role);
-        }
-        break;
-
-        case 'get_room':
-            $roomId = $_GET['roomId'] ?? null;
-
-            if(!roomId) {
-                $response = [
+    // Route requests based on action
+    switch ($action) {
+        case 'create_room':
+            // Create a new room
+            $role = isset($_POST['role']) ? $_POST['role'] : 'teacher';
+            $response = $roomManager->createRoom($role);
+            break;
+            
+        case 'join_room':
+            // Join an existing room
+            $roomId = isset($_POST['roomId']) ? $_POST['roomId'] : null;
+            $username = isset($_POST['username']) ? $_POST['username'] : 'Anonymous';
+            $role = isset($_POST['role']) ? $_POST['role'] : 'student';
+            
+            if (!$roomId) {
+                $response = array(
                     'success' => false,
-                    'error' => 'Room Id is required'
-                ];
+                    'error' => 'Room ID is required'
+                );
+            } else {
+                $response = $roomManager->joinRoom($roomId, $username, $role);
+            }
+            break;
+            
+        case 'get_room':
+            // Get room information
+            $roomId = isset($_GET['roomId']) ? $_GET['roomId'] : null;
+            
+            if (!$roomId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID is required'
+                );
             } else {
                 $response = $roomManager->getRoomInfo($roomId);
             }
             break;
+            
+        case 'poll':
+            // Poll for new events
+            $roomId = isset($_GET['roomId']) ? $_GET['roomId'] : null;
+            $afterId = isset($_GET['after']) ? intval($_GET['after']) : 0;
+            
+            if (!$roomId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID is required'
+                );
+            } else {
+                $response = $eventBus->poll($roomId, $afterId);
+            }
+            break;
+            
+        case 'emit':
+            // Emit a new event
+            $roomId = isset($_POST['roomId']) ? $_POST['roomId'] : null;
+            $eventType = isset($_POST['type']) ? $_POST['type'] : null;
+            $eventDataJson = isset($_POST['data']) ? $_POST['data'] : '{}';
+            $eventData = json_decode($eventDataJson, true);
+            
+            if (!$roomId || !$eventType) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID and event type are required'
+                );
+            } else {
+                $response = $eventBus->emit($roomId, $eventType, $eventData);
+            }
+            break;
+            
+        case 'get_events':
+            // Get all events (for debugging)
+            $roomId = isset($_GET['roomId']) ? $_GET['roomId'] : null;
+            
+            if (!$roomId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID is required'
+                );
+            } else {
+                $response = $eventBus->getAllEvents($roomId);
+            }
+            break;
+            
+        default:
+            $response = array(
+                'success' => false,
+                'error' => 'Invalid action',
+                'provided_action' => $action,
+                'available_actions' => array(
+                    'create_room',
+                    'join_room',
+                    'get_room',
+                    'poll',
+                    'emit',
+                    'get_events'
+                )
+            );
+    }
 
-            case 'poll':
-                $room = $_GET['roomId'] ?? null;
-                $afterId = intval($_GET['after'] ??0);
+    // Output response
+    echo json_encode($response, JSON_PRETTY_PRINT);
 
-                if(!$roomId) {
-                    $response = [
-                        'success' => false,
-                        'error' => 'Room id is required'
-                    ];
-                } else {
-                    $response = $eventBus->poll($roomId, $afterId);
-                }
-                break;
-
-                case 'emit':
-                    $roomId = $_GET['roomId'] ?? null;
-                    $eventType = $_POST['type'] ??'';
-                    $eventData = json_decode($_POST['data'] ?? null, true); 
-
-                    if(!$roomId || !$eventType) {
-                        $response = [
-                            'success'=> false,
-                            'error' => 'Room id and event type are required'
-                        ];
-                    } else {
-                        $response = $eventBus -> emit($roomId, $eventType, $eventData);
-                    }
-                    break;
-
-                    default:
-                        $response = [
-                            'success' => false,
-                            'error' => 'Invalid action',
-                            'available_actions' => [
-                                'create_room',
-                                'join_room',
-                                'get_room',
-                                'poll',
-                                'emit',
-                            ]
-                        ];
+} catch (Exception $e) {
+    echo json_encode(array(
+        'success' => false,
+        'error' => 'Exception: ' . $e->getMessage(),
+        'trace' => $e->getTraceAsString()
+    ));
 }
-
-echo json_encode($response, JSON_PRETTY_PRINT);
-?>

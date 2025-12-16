@@ -1,4 +1,4 @@
-i// public/app.js - Core client application with event bus and polling
+// public/app.js - Core client application with event bus and polling
 
 class App {
     constructor(roomId, username, role) {
@@ -50,7 +50,7 @@ class App {
         });
     }
     
-    // Load initial room state
+    // Load initial room state and past events
     async loadRoomState() {
         try {
             const response = await fetch(`api.php?action=get_room&roomId=${this.roomId}`);
@@ -59,6 +59,9 @@ class App {
             if (data.success) {
                 console.log('Room state loaded:', data.room);
                 this.updateParticipantCount(data.room.participants.length);
+                
+                // Load all past events
+                await this.loadPastEvents();
             } else {
                 console.error('Failed to load room state:', data.error);
                 alert('Error: ' + data.error);
@@ -66,6 +69,30 @@ class App {
             }
         } catch (error) {
             console.error('Error loading room state:', error);
+        }
+    }
+    
+    // Load past events (for when joining existing room)
+    async loadPastEvents() {
+        try {
+            const response = await fetch(`api.php?action=get_events&roomId=${this.roomId}`);
+            const data = await response.json();
+            
+            if (data.success && data.events) {
+                console.log('Loading past events:', data.events.length);
+                
+                data.events.forEach(event => {
+                    // Update last event ID
+                    if (event.id > this.lastEventId) {
+                        this.lastEventId = event.id;
+                    }
+                    
+                    // Emit event to handlers (but don't log "joined" for current user)
+                    this.emitLocal(event.type, event.data);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading past events:', error);
         }
     }
     
@@ -112,6 +139,9 @@ class App {
                         // Emit event to handlers
                         this.emitLocal(event.type, event.data);
                     });
+                    
+                    // Update participant count when someone joins
+                    this.updateParticipantCount();
                 }
             } else {
                 console.error('Poll error:', data.error);

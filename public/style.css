@@ -150,6 +150,63 @@ button:active {
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.messages-panel {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    grid-column: 1 / -1;
+}
+
+.messages-panel h2 {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+#messageDisplay {
+    flex: 1;
+    max-height: 300px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.message {
+    background: white;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border-left: 3px solid #3498db;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.message-header {
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
+
+.message-body {
+    color: #34495e;
+    line-height: 1.4;
+    margin-bottom: 5px;
+}
+
+.message-time {
+    font-size: 0.75em;
+    color: #95a5a6;
+    text-align: right;
 }
 
 .event-log {
@@ -157,7 +214,6 @@ button:active {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
 }
 
 .event-log h2 {
@@ -223,5 +279,6 @@ button:active {
     
     .room-content {
         padding: 15px;
+        grid-template-columns: 1fr;
     }
 }
