@@ -28,10 +28,14 @@ set_error_handler('handleError');
 try {
     require_once __DIR__ . '/core/room.php';
     require_once __DIR__ . '/core/eventbus.php';
+    require_once __DIR__ . '/features/files/server.php';
+    require_once __DIR__ . '/features/notes/server.php';
 
     // Initialize managers
     $roomManager = new RoomManager();
     $eventBus = new EventBus();
+    $filesFeature = new FilesFeature();
+    $notesFeature = new NotesFeature();
 
     // Get action from request
     $action = isset($_GET['action']) ? $_GET['action'] : (isset($_POST['action']) ? $_POST['action'] : null);
@@ -123,6 +127,138 @@ try {
             }
             break;
             
+        case 'upload_file':
+            // Upload a file
+            $roomId = isset($_POST['roomId']) ? $_POST['roomId'] : null;
+            $username = isset($_POST['username']) ? $_POST['username'] : 'Anonymous';
+            
+            if (!$roomId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID is required'
+                );
+            } else {
+                $response = $filesFeature->uploadFile($roomId, $username);
+            }
+            break;
+            
+        case 'get_files':
+            // Get list of files
+            $roomId = isset($_GET['roomId']) ? $_GET['roomId'] : null;
+            
+            if (!$roomId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID is required'
+                );
+            } else {
+                $response = $filesFeature->getFiles($roomId);
+            }
+            break;
+            
+        case 'download_file':
+            // Download a file
+            $roomId = isset($_GET['roomId']) ? $_GET['roomId'] : null;
+            $fileId = isset($_GET['fileId']) ? $_GET['fileId'] : null;
+            
+            if (!$roomId || !$fileId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID and File ID are required'
+                );
+            } else {
+                $result = $filesFeature->downloadFile($roomId, $fileId);
+                
+                if ($result['success']) {
+                    // Clear any previous output
+                    if (ob_get_level()) {
+                        ob_end_clean();
+                    }
+                    
+                    // Send headers
+                    header('Content-Type: ' . $result['type']);
+                    header('Content-Disposition: attachment; filename="' . $result['name'] . '"');
+                    header('Content-Length: ' . filesize($result['path']));
+                    header('Cache-Control: no-cache');
+                    header('Content-Transfer-Encoding: binary');
+                    
+                    // Read file in chunks to avoid memory issues
+                    $file = fopen($result['path'], 'rb');
+                    if ($file) {
+                        while (!feof($file)) {
+                            echo fread($file, 8192); // Read 8KB at a time
+                            flush(); // Send to browser immediately
+                        }
+                        fclose($file);
+                    }
+                    exit;
+                } else {
+                    $response = $result;
+                }
+            }
+            break;
+            
+        case 'delete_file':
+            // Delete a file
+            $roomId = isset($_POST['roomId']) ? $_POST['roomId'] : null;
+            $fileId = isset($_POST['fileId']) ? $_POST['fileId'] : null;
+            $username = isset($_POST['username']) ? $_POST['username'] : 'Anonymous';
+            
+            if (!$roomId || !$fileId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID and File ID are required'
+                );
+            } else {
+                $response = $filesFeature->deleteFile($roomId, $fileId, $username);
+            }
+            break;
+            
+        case 'update_notes':
+            // Update notes content
+            $roomId = isset($_POST['roomId']) ? $_POST['roomId'] : null;
+            $content = isset($_POST['content']) ? $_POST['content'] : '';
+            $username = isset($_POST['username']) ? $_POST['username'] : 'Anonymous';
+            
+            if (!$roomId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID is required'
+                );
+            } else {
+                $response = $notesFeature->updateNotes($roomId, $content, $username);
+            }
+            break;
+            
+        case 'get_notes':
+            // Get notes content
+            $roomId = isset($_GET['roomId']) ? $_GET['roomId'] : null;
+            
+            if (!$roomId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID is required'
+                );
+            } else {
+                $response = $notesFeature->getNotes($roomId);
+            }
+            break;
+            
+        case 'clear_notes':
+            // Clear notes
+            $roomId = isset($_POST['roomId']) ? $_POST['roomId'] : null;
+            $username = isset($_POST['username']) ? $_POST['username'] : 'Anonymous';
+            
+            if (!$roomId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID is required'
+                );
+            } else {
+                $response = $notesFeature->clearNotes($roomId, $username);
+            }
+            break;
+            
         default:
             $response = array(
                 'success' => false,
@@ -134,7 +270,14 @@ try {
                     'get_room',
                     'poll',
                     'emit',
-                    'get_events'
+                    'get_events',
+                    'upload_file',
+                    'get_files',
+                    'download_file',
+                    'delete_file',
+                    'update_notes',
+                    'get_notes',
+                    'clear_notes'
                 )
             );
     }

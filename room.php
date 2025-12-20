@@ -20,6 +20,35 @@
         </header>
         
         <main class="room-content">
+            <div class="notes-panel">
+                <h2>Shared Notes</h2>
+                <div class="notes-controls">
+                    <span id="saveIndicator" style="display: none;"></span>
+                    <span id="notesInfo" class="notes-info"></span>
+                    <button id="clearNotesBtn" class="btn-clear">Clear Notes</button>
+                </div>
+                <textarea id="notesTextarea" placeholder="Teacher can type notes here. Students will see them in real-time..."></textarea>
+            </div>
+            
+            <div class="files-panel">
+                <h2>Shared Files</h2>
+                
+                <div id="fileDropZone" class="drop-zone">
+                    <div class="drop-zone-content">
+                        <p>📁 Drag & drop files here</p>
+                        <p>or</p>
+                        <button id="browseBtn">Browse Files</button>
+                        <input type="file" id="fileInput" multiple style="display: none;">
+                    </div>
+                </div>
+                
+                <div id="uploadStatus" class="upload-status" style="display: none;"></div>
+                
+                <div id="filesList" class="files-list">
+                    <div class="no-files">No files shared yet</div>
+                </div>
+            </div>
+            
             <div class="messages-panel">
                 <h2>Messages</h2>
                 <div id="messageDisplay"></div>
@@ -39,6 +68,8 @@
     </div>
     
     <script src="public/app.js"></script>
+    <script src="features/files/client.js"></script>
+    <script src="features/notes/client.js"></script>
     <script>
         // Get room ID from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -60,6 +91,12 @@
         // Initialize app
         const app = new App(roomId, username, role);
         app.start();
+        
+        // Initialize files feature
+        const filesClient = new FilesClient(app);
+        
+        // Initialize notes feature
+        const notesClient = new NotesClient(app);
         
         // Add handler for displaying messages
         app.on('test_message', function(data) {
