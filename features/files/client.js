@@ -31,6 +31,19 @@ class FilesClient {
         
         if (!dropZone || !fileInput || !browseBtn) return;
         
+        // Hide upload controls for students
+        if (this.app.role !== 'teacher') {
+            dropZone.style.display = 'none';
+            
+            // Show message for students
+            const note = document.createElement('div');
+            note.className = 'files-student-note';
+            note.textContent = '📌 Only teachers can upload files. Files uploaded by the teacher will appear below.';
+            dropZone.parentNode.insertBefore(note, dropZone);
+            
+            return;
+        }
+        
         // Browse button
         browseBtn.addEventListener('click', () => {
             fileInput.click();
@@ -82,10 +95,11 @@ class FilesClient {
         
         for (const file of files) {
             // Check file size before uploading
-            const maxSize = 2048 * 1024 * 1024; // 2GB
+            // 10MB for Codespaces, change to 2048 for real LAN
+            const maxSize = 10 * 1024 * 1024; // 10MB
             if (file.size > maxSize) {
                 if (uploadStatus) {
-                    uploadStatus.textContent = `Error: ${file.name} is too large (max 2GB)`;
+                    uploadStatus.textContent = `Error: ${file.name} is too large (max 10MB on Codespaces). Will work with 2GB files on real LAN!`;
                     uploadStatus.style.background = '#ffebee';
                     uploadStatus.style.borderColor = '#e74c3c';
                     uploadStatus.style.color = '#c0392b';

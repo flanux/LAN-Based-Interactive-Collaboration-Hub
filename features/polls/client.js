@@ -223,6 +223,10 @@ class PollsClient {
     }
     
     onPollCreated(poll) {
+        // Check if poll already exists (prevent duplicates)
+        const exists = this.polls.find(p => p.id === poll.id);
+        if (exists) return;
+        
         this.polls.push(poll);
         this.renderPolls();
         this.app.log(`Poll created: ${poll.question}`);

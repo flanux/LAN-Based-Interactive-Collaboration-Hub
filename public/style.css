@@ -421,6 +421,16 @@ button:active {
     border-bottom: 2px solid #ecf0f1;
 }
 
+.files-student-note {
+    background: #ebf5fb;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+    margin-bottom: 15px;
+    color: #2c3e50;
+    font-size: 0.9em;
+}
+
 .drop-zone {
     border: 3px dashed #bdc3c7;
     border-radius: 8px;
@@ -551,14 +561,42 @@ button:active {
     border-bottom: 2px solid #ecf0f1;
 }
 
-#messageDisplay {
+.message-display {
     flex: 1;
-    max-height: 300px;
+    max-height: 400px;
     overflow-y: auto;
     background: #f8f9fa;
     padding: 15px;
     border-radius: 4px;
     margin-bottom: 15px;
+    min-height: 300px;
+}
+
+.message-input-container {
+    display: flex;
+    gap: 10px;
+}
+
+#messageInput {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+#messageInput:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+#sendMessageBtn {
+    background: #3498db;
+    padding: 10px 20px;
+}
+
+#sendMessageBtn:hover {
+    background: #2980b9;
 }
 
 .message {

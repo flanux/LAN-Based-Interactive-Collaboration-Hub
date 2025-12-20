@@ -74,19 +74,12 @@
             </div>
             
             <div class="messages-panel">
-                <h2>Messages</h2>
-                <div id="messageDisplay"></div>
-            </div>
-            
-            <div class="event-log">
-                <h2>Event Log (Debug)</h2>
-                <div id="eventLog"></div>
-            </div>
-            
-            <div class="test-controls">
-                <h2>Send Message</h2>
-                <input type="text" id="testMessage" placeholder="Type a message to everyone in the room">
-                <button onclick="sendTestEvent()">Send Message</button>
+                <h2>Chat</h2>
+                <div id="messageDisplay" class="message-display"></div>
+                <div class="message-input-container">
+                    <input type="text" id="messageInput" placeholder="Type a message...">
+                    <button id="sendMessageBtn">Send</button>
+                </div>
             </div>
         </main>
     </div>
@@ -159,9 +152,12 @@
             }
         });
         
-        // Test function to send events
-        function sendTestEvent() {
-            const message = document.getElementById('testMessage').value;
+        // Message input handler
+        const messageInput = document.getElementById('messageInput');
+        const sendMessageBtn = document.getElementById('sendMessageBtn');
+        
+        function sendMessage() {
+            const message = messageInput.value.trim();
             if (!message) return;
             
             app.emit('test_message', {
@@ -169,15 +165,20 @@
                 message: message
             });
             
-            document.getElementById('testMessage').value = '';
+            messageInput.value = '';
         }
         
-        // Allow Enter key to send test message
-        document.getElementById('testMessage').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendTestEvent();
-            }
-        });
+        if (sendMessageBtn) {
+            sendMessageBtn.addEventListener('click', sendMessage);
+        }
+        
+        if (messageInput) {
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
     </script>
 </body>
 </html>
