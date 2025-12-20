@@ -115,6 +115,20 @@ class FilesClient {
                     body: formData
                 });
                 
+                // Check if response is ok
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                }
+                
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    // Server returned HTML or something else (probably an error page)
+                    const text = await response.text();
+                    console.error('Server returned non-JSON:', text.substring(0, 500));
+                    throw new Error('Server error - file may be too large or server timed out');
+                }
+                
                 const data = await response.json();
                 
                 if (data.success) {

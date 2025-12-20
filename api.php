@@ -6,14 +6,15 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0); // Don't display errors in output
 ini_set('log_errors', 1);
 
-// Set headers before any output
-header('Content-Type: application/json');
+// DON'T set JSON headers yet - download_file needs different headers
+// header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
 // Catch any errors and return as JSON
 function handleError($errno, $errstr, $errfile, $errline) {
+    header('Content-Type: application/json');
     echo json_encode(array(
         'success' => false,
         'error' => 'Server error: ' . $errstr,
@@ -30,18 +31,25 @@ try {
     require_once __DIR__ . '/core/eventbus.php';
     require_once __DIR__ . '/features/files/server.php';
     require_once __DIR__ . '/features/notes/server.php';
+    require_once __DIR__ . '/features/polls/server.php';
 
     // Initialize managers
     $roomManager = new RoomManager();
     $eventBus = new EventBus();
     $filesFeature = new FilesFeature();
     $notesFeature = new NotesFeature();
+    $pollsFeature = new PollsFeature();
 
     // Get action from request
     $action = isset($_GET['action']) ? $_GET['action'] : (isset($_POST['action']) ? $_POST['action'] : null);
 
     // Response array
     $response = array();
+    
+    // Set JSON header for most responses (download_file will override this)
+    if ($action !== 'download_file') {
+        header('Content-Type: application/json');
+    }
 
     // Route requests based on action
     switch ($action) {
@@ -162,6 +170,7 @@ try {
             $fileId = isset($_GET['fileId']) ? $_GET['fileId'] : null;
             
             if (!$roomId || !$fileId) {
+                header('Content-Type: application/json');
                 $response = array(
                     'success' => false,
                     'error' => 'Room ID and File ID are required'
@@ -170,16 +179,27 @@ try {
                 $result = $filesFeature->downloadFile($roomId, $fileId);
                 
                 if ($result['success']) {
-                    // Clear any previous output
-                    if (ob_get_level()) {
+                    // Clear any previous output buffers
+                    while (ob_get_level()) {
                         ob_end_clean();
                     }
                     
-                    // Send headers
+                    // Verify file exists before sending headers
+                    if (!file_exists($result['path'])) {
+                        header('Content-Type: application/json');
+                        echo json_encode(array(
+                            'success' => false,
+                            'error' => 'File not found on disk'
+                        ));
+                        exit;
+                    }
+                    
+                    // Send appropriate headers for file download
                     header('Content-Type: ' . $result['type']);
                     header('Content-Disposition: attachment; filename="' . $result['name'] . '"');
                     header('Content-Length: ' . filesize($result['path']));
-                    header('Cache-Control: no-cache');
+                    header('Cache-Control: must-revalidate');
+                    header('Pragma: public');
                     header('Content-Transfer-Encoding: binary');
                     
                     // Read file in chunks to avoid memory issues
@@ -190,9 +210,16 @@ try {
                             flush(); // Send to browser immediately
                         }
                         fclose($file);
+                    } else {
+                        header('Content-Type: application/json');
+                        echo json_encode(array(
+                            'success' => false,
+                            'error' => 'Could not open file'
+                        ));
                     }
                     exit;
                 } else {
+                    header('Content-Type: application/json');
                     $response = $result;
                 }
             }
@@ -259,25 +286,97 @@ try {
             }
             break;
             
+        case 'create_poll':
+            // Create a new poll
+            $roomId = isset($_POST['roomId']) ? $_POST['roomId'] : null;
+            $question = isset($_POST['question']) ? $_POST['question'] : '';
+            $optionsJson = isset($_POST['options']) ? $_POST['options'] : '[]';
+            $options = json_decode($optionsJson, true);
+            $username = isset($_POST['username']) ? $_POST['username'] : 'Anonymous';
+            
+            if (!$roomId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID is required'
+                );
+            } else {
+                $response = $pollsFeature->createPoll($roomId, $question, $options, $username);
+            }
+            break;
+            
+        case 'submit_vote':
+            // Submit a vote
+            $roomId = isset($_POST['roomId']) ? $_POST['roomId'] : null;
+            $pollId = isset($_POST['pollId']) ? $_POST['pollId'] : null;
+            $optionIndex = isset($_POST['optionIndex']) ? intval($_POST['optionIndex']) : -1;
+            $username = isset($_POST['username']) ? $_POST['username'] : 'Anonymous';
+            
+            if (!$roomId || !$pollId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID and Poll ID are required'
+                );
+            } else {
+                $response = $pollsFeature->submitVote($roomId, $pollId, $optionIndex, $username);
+            }
+            break;
+            
+        case 'close_poll':
+            // Close a poll
+            $roomId = isset($_POST['roomId']) ? $_POST['roomId'] : null;
+            $pollId = isset($_POST['pollId']) ? $_POST['pollId'] : null;
+            $username = isset($_POST['username']) ? $_POST['username'] : 'Anonymous';
+            
+            if (!$roomId || !$pollId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID and Poll ID are required'
+                );
+            } else {
+                $response = $pollsFeature->closePoll($roomId, $pollId, $username);
+            }
+            break;
+            
+        case 'get_polls':
+            // Get all polls
+            $roomId = isset($_GET['roomId']) ? $_GET['roomId'] : null;
+            
+            if (!$roomId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID is required'
+                );
+            } else {
+                $response = $pollsFeature->getPolls($roomId);
+            }
+            break;
+            
+        case 'delete_poll':
+            // Delete a poll
+            $roomId = isset($_POST['roomId']) ? $_POST['roomId'] : null;
+            $pollId = isset($_POST['pollId']) ? $_POST['pollId'] : null;
+            $username = isset($_POST['username']) ? $_POST['username'] : 'Anonymous';
+            
+            if (!$roomId || !$pollId) {
+                $response = array(
+                    'success' => false,
+                    'error' => 'Room ID and Poll ID are required'
+                );
+            } else {
+                $response = $pollsFeature->deletePoll($roomId, $pollId, $username);
+            }
+            break;
+            
         default:
             $response = array(
                 'success' => false,
                 'error' => 'Invalid action',
                 'provided_action' => $action,
                 'available_actions' => array(
-                    'create_room',
-                    'join_room',
-                    'get_room',
-                    'poll',
-                    'emit',
-                    'get_events',
-                    'upload_file',
-                    'get_files',
-                    'download_file',
-                    'delete_file',
-                    'update_notes',
-                    'get_notes',
-                    'clear_notes'
+                    'create_room', 'join_room', 'get_room', 'poll', 'emit', 'get_events',
+                    'upload_file', 'get_files', 'download_file', 'delete_file',
+                    'update_notes', 'get_notes', 'clear_notes',
+                    'create_poll', 'submit_vote', 'close_poll', 'get_polls', 'delete_poll'
                 )
             );
     }

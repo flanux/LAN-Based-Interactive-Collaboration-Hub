@@ -20,6 +20,30 @@
         </header>
         
         <main class="room-content">
+            <div class="polls-panel">
+                <h2>Polls & Quizzes</h2>
+                
+                <div id="createPollForm">
+                    <button id="createPollBtn" class="btn-create-poll">+ Create New Poll</button>
+                    
+                    <div id="pollForm" style="display: none;">
+                        <input type="text" id="pollQuestion" placeholder="Enter your question" class="poll-question-input">
+                        
+                        <div id="pollOptions"></div>
+                        
+                        <div class="poll-form-actions">
+                            <button id="addOptionBtn" class="btn-add-option">+ Add Option</button>
+                            <button id="submitPollBtn" class="btn-submit-poll">Create Poll</button>
+                            <button id="cancelPollBtn" class="btn-cancel-poll">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="pollsList" class="polls-list">
+                    <div class="no-polls">No polls yet</div>
+                </div>
+            </div>
+            
             <div class="notes-panel">
                 <h2>Shared Notes</h2>
                 <div class="notes-controls">
@@ -70,6 +94,7 @@
     <script src="public/app.js"></script>
     <script src="features/files/client.js"></script>
     <script src="features/notes/client.js"></script>
+    <script src="features/polls/client.js"></script>
     <script>
         // Get room ID from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -97,6 +122,9 @@
         
         // Initialize notes feature
         const notesClient = new NotesClient(app);
+        
+        // Initialize polls feature
+        const pollsClient = new PollsClient(app);
         
         // Add handler for displaying messages
         app.on('test_message', function(data) {
