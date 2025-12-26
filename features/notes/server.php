@@ -1,5 +1,4 @@
 <?php
-// features/notes/server.php - Handles shared notes
 
 require_once __DIR__ . '/../../core/storage.php';
 require_once __DIR__ . '/../../core/eventbus.php';
@@ -13,7 +12,6 @@ class NotesFeature {
         $this->eventBus = new EventBus();
     }
     
-    // Update notes content
     public function updateNotes($roomId, $content, $username) {
         if (!$this->storage->roomExists($roomId)) {
             return array(
@@ -22,14 +20,12 @@ class NotesFeature {
             );
         }
         
-        // Update room state with new notes
         $this->storage->updateRoomState($roomId, array(
             'notes' => $content,
             'notesUpdatedBy' => $username,
             'notesUpdatedAt' => time()
         ));
         
-        // Broadcast notes_updated event
         $this->eventBus->emit($roomId, 'notes_updated', array(
             'content' => $content,
             'updatedBy' => $username,
@@ -41,8 +37,7 @@ class NotesFeature {
             'content' => $content
         );
     }
-    
-    // Get current notes
+   
     public function getNotes($roomId) {
         if (!$this->storage->roomExists($roomId)) {
             return array(
@@ -64,7 +59,6 @@ class NotesFeature {
         );
     }
     
-    // Clear notes
     public function clearNotes($roomId, $username) {
         if (!$this->storage->roomExists($roomId)) {
             return array(
@@ -73,14 +67,12 @@ class NotesFeature {
             );
         }
         
-        // Clear notes
         $this->storage->updateRoomState($roomId, array(
             'notes' => '',
             'notesUpdatedBy' => $username,
             'notesUpdatedAt' => time()
         ));
         
-        // Broadcast notes_cleared event
         $this->eventBus->emit($roomId, 'notes_cleared', array(
             'clearedBy' => $username
         ));

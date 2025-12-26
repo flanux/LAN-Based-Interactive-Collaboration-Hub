@@ -1,5 +1,3 @@
-// features/notes/client.js - Client-side notes handling
-
 class NotesClient {
     constructor(app) {
         this.app = app;
@@ -13,13 +11,10 @@ class NotesClient {
         this.textarea = document.getElementById('notesTextarea');
         if (!this.textarea) return;
         
-        // Load existing notes
         this.loadNotes();
         
-        // Set up event listeners
         this.setupEventListeners();
         
-        // Listen for notes events
         this.app.on('notes_updated', (data) => {
             this.onNotesUpdated(data);
         });
@@ -28,12 +23,10 @@ class NotesClient {
             this.onNotesCleared(data);
         });
         
-        // Set read-only for students
         if (this.app.role !== 'teacher') {
             this.textarea.readOnly = true;
             this.textarea.placeholder = 'Teacher notes will appear here...';
             
-            // Hide clear button for students
             const clearBtn = document.getElementById('clearNotesBtn');
             if (clearBtn) {
                 clearBtn.style.display = 'none';
@@ -43,17 +36,14 @@ class NotesClient {
     
     setupEventListeners() {
         if (this.app.role === 'teacher') {
-            // Auto-save as teacher types (with debounce)
             this.textarea.addEventListener('input', () => {
                 this.autoSave();
             });
             
-            // Save on blur
             this.textarea.addEventListener('blur', () => {
                 this.saveNotes();
             });
             
-            // Clear button
             const clearBtn = document.getElementById('clearNotesBtn');
             if (clearBtn) {
                 clearBtn.addEventListener('click', () => {
@@ -72,7 +62,6 @@ class NotesClient {
                 this.lastContent = data.content;
                 this.textarea.value = data.content;
                 
-                // Show last update info
                 if (data.updatedBy && data.updatedAt) {
                     this.showUpdateInfo(data.updatedBy, data.updatedAt);
                 }
@@ -83,12 +72,10 @@ class NotesClient {
     }
     
     autoSave() {
-        // Clear existing timeout
         if (this.saveTimeout) {
             clearTimeout(this.saveTimeout);
         }
         
-        // Set new timeout (save 1 second after user stops typing)
         this.saveTimeout = setTimeout(() => {
             this.saveNotes();
         }, 1000);
@@ -97,7 +84,6 @@ class NotesClient {
     async saveNotes() {
         const content = this.textarea.value;
         
-        // Don't save if content hasn't changed
         if (content === this.lastContent) return;
         
         try {
@@ -154,17 +140,13 @@ class NotesClient {
     }
     
     onNotesUpdated(data) {
-        // Don't update if this user is the one who updated it
         if (data.updatedBy === this.app.username) return;
         
-        // Update textarea content
         this.textarea.value = data.content;
         this.lastContent = data.content;
         
-        // Show update notification
         this.showUpdateInfo(data.updatedBy, data.updatedAt);
         
-        // Log
         this.app.log(`Notes updated by ${data.updatedBy}`);
     }
     
