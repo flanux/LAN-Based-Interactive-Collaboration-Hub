@@ -1,5 +1,3 @@
-// features/polls/client.js - Client-side polls handling
-
 class PollsClient {
     constructor(app) {
         this.app = app;
@@ -8,19 +6,15 @@ class PollsClient {
     }
     
     init() {
-        // Load existing polls
         this.loadPolls();
         
-        // Set up event listeners
         this.setupEventListeners();
         
-        // Listen for poll events
         this.app.on('poll_created', (data) => this.onPollCreated(data));
         this.app.on('vote_submitted', (data) => this.onVoteSubmitted(data));
         this.app.on('poll_closed', (data) => this.onPollClosed(data));
         this.app.on('poll_deleted', (data) => this.onPollDeleted(data));
         
-        // Hide create form for students
         if (this.app.role !== 'teacher') {
             const createForm = document.getElementById('createPollForm');
             if (createForm) {
@@ -72,7 +66,6 @@ class PollsClient {
             form.style.display = 'block';
             createBtn.style.display = 'none';
             
-            // Clear form
             document.getElementById('pollQuestion').value = '';
             const optionsDiv = document.getElementById('pollOptions');
             optionsDiv.innerHTML = `
@@ -223,7 +216,6 @@ class PollsClient {
     }
     
     onPollCreated(poll) {
-        // Check if poll already exists (prevent duplicates)
         const exists = this.polls.find(p => p.id === poll.id);
         if (exists) return;
         
@@ -233,7 +225,6 @@ class PollsClient {
     }
     
     onVoteSubmitted(data) {
-        // Find and update the poll
         const poll = this.polls.find(p => p.id === data.pollId);
         if (poll) {
             if (!poll.votes) poll.votes = {};
@@ -283,7 +274,6 @@ class PollsClient {
             pollDiv.appendChild(question);
             pollDiv.appendChild(status);
             
-            // Calculate results
             const totalVotes = Object.keys(poll.votes || {}).length;
             const voteCounts = {};
             poll.options.forEach((opt, idx) => voteCounts[idx] = 0);
@@ -292,7 +282,6 @@ class PollsClient {
                 voteCounts[optIdx] = (voteCounts[optIdx] || 0) + 1;
             });
             
-            // Render options
             const optionsDiv = document.createElement('div');
             optionsDiv.className = 'poll-options';
             
@@ -304,18 +293,15 @@ class PollsClient {
                 const voteCount = voteCounts[index] || 0;
                 const percentage = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
                 
-                // Show results if closed or if teacher or if user voted
                 const showResults = !poll.active || this.app.role === 'teacher' || poll.votes[this.app.username] !== undefined;
                 
                 if (poll.active && !showResults) {
-                    // Voting button
                     const btn = document.createElement('button');
                     btn.className = 'vote-btn';
                     btn.textContent = option;
                     btn.onclick = () => this.submitVote(poll.id, index);
                     optionDiv.appendChild(btn);
                 } else {
-                    // Show results
                     const resultDiv = document.createElement('div');
                     resultDiv.className = 'poll-result' + (userVoted ? ' user-voted' : '');
                     
@@ -343,7 +329,6 @@ class PollsClient {
             
             pollDiv.appendChild(optionsDiv);
             
-            // Controls for teacher
             if (this.app.role === 'teacher') {
                 const controls = document.createElement('div');
                 controls.className = 'poll-controls';

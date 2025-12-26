@@ -1,5 +1,4 @@
 <?php
-// features/polls/server.php - Handles polls/quizzes
 
 require_once __DIR__ . '/../../core/storage.php';
 require_once __DIR__ . '/../../core/eventbus.php';
@@ -13,7 +12,6 @@ class PollsFeature {
         $this->eventBus = new EventBus();
     }
     
-    // Create a new poll
     public function createPoll($roomId, $question, $options, $username) {
         if (!$this->storage->roomExists($roomId)) {
             return array(
@@ -22,7 +20,6 @@ class PollsFeature {
             );
         }
         
-        // Validate inputs
         if (empty($question) || empty($options) || count($options) < 2) {
             return array(
                 'success' => false,
@@ -30,15 +27,12 @@ class PollsFeature {
             );
         }
         
-        // Get current state
         $state = $this->storage->getRoomState($roomId);
         
-        // Initialize polls array if needed
         if (!isset($state['polls'])) {
             $state['polls'] = array();
         }
         
-        // Create poll object
         $poll = array(
             'id' => uniqid(),
             'question' => $question,
@@ -49,15 +43,12 @@ class PollsFeature {
             'active' => true
         );
         
-        // Add to polls array
         $state['polls'][] = $poll;
         
-        // Update room state
         $this->storage->updateRoomState($roomId, array(
             'polls' => $state['polls']
         ));
         
-        // Broadcast poll_created event
         $this->eventBus->emit($roomId, 'poll_created', $poll);
         
         return array(
@@ -66,7 +57,6 @@ class PollsFeature {
         );
     }
     
-    // Submit a vote
     public function submitVote($roomId, $pollId, $optionIndex, $username) {
         if (!$this->storage->roomExists($roomId)) {
             return array(
@@ -75,11 +65,9 @@ class PollsFeature {
             );
         }
         
-        // Get current state
         $state = $this->storage->getRoomState($roomId);
         $polls = isset($state['polls']) ? $state['polls'] : array();
         
-        // Find the poll
         $pollIndex = -1;
         $poll = null;
         for ($i = 0; $i < count($polls); $i++) {
@@ -104,7 +92,6 @@ class PollsFeature {
             );
         }
         
-        // Check if option index is valid
         if ($optionIndex < 0 || $optionIndex >= count($poll['options'])) {
             return array(
                 'success' => false,
@@ -112,18 +99,14 @@ class PollsFeature {
             );
         }
         
-        // Update or add vote
         $poll['votes'][$username] = $optionIndex;
         
-        // Update poll in array
         $polls[$pollIndex] = $poll;
         
-        // Save to state
         $this->storage->updateRoomState($roomId, array(
             'polls' => $polls
         ));
         
-        // Broadcast vote_submitted event
         $this->eventBus->emit($roomId, 'vote_submitted', array(
             'pollId' => $pollId,
             'username' => $username,
@@ -136,7 +119,6 @@ class PollsFeature {
         );
     }
     
-    // Close a poll
     public function closePoll($roomId, $pollId, $username) {
         if (!$this->storage->roomExists($roomId)) {
             return array(
@@ -145,11 +127,9 @@ class PollsFeature {
             );
         }
         
-        // Get current state
         $state = $this->storage->getRoomState($roomId);
         $polls = isset($state['polls']) ? $state['polls'] : array();
         
-        // Find and close the poll
         $pollIndex = -1;
         $poll = null;
         for ($i = 0; $i < count($polls); $i++) {
@@ -168,12 +148,10 @@ class PollsFeature {
             );
         }
         
-        // Save to state
         $this->storage->updateRoomState($roomId, array(
             'polls' => $polls
         ));
         
-        // Broadcast poll_closed event
         $this->eventBus->emit($roomId, 'poll_closed', array(
             'pollId' => $pollId,
             'closedBy' => $username
@@ -185,7 +163,6 @@ class PollsFeature {
         );
     }
     
-    // Get all polls
     public function getPolls($roomId) {
         if (!$this->storage->roomExists($roomId)) {
             return array(
@@ -203,7 +180,6 @@ class PollsFeature {
         );
     }
     
-    // Delete a poll
     public function deletePoll($roomId, $pollId, $username) {
         if (!$this->storage->roomExists($roomId)) {
             return array(
@@ -212,11 +188,9 @@ class PollsFeature {
             );
         }
         
-        // Get current state
         $state = $this->storage->getRoomState($roomId);
         $polls = isset($state['polls']) ? $state['polls'] : array();
         
-        // Filter out the poll
         $newPolls = array();
         foreach ($polls as $poll) {
             if ($poll['id'] !== $pollId) {
@@ -224,12 +198,10 @@ class PollsFeature {
             }
         }
         
-        // Save to state
         $this->storage->updateRoomState($roomId, array(
             'polls' => $newPolls
         ));
         
-        // Broadcast poll_deleted event
         $this->eventBus->emit($roomId, 'poll_deleted', array(
             'pollId' => $pollId,
             'deletedBy' => $username
