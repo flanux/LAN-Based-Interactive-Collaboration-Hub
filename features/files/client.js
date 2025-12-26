@@ -1,4 +1,3 @@
-// features/files/client.js - Client-side file handling
 
 class FilesClient {
     constructor(app) {
@@ -8,13 +7,10 @@ class FilesClient {
     }
     
     init() {
-        // Set up event listeners
         this.setupEventListeners();
         
-        // Load existing files
         this.loadFiles();
         
-        // Listen for file events
         this.app.on('file_uploaded', (data) => {
             this.onFileUploaded(data);
         });
@@ -31,11 +27,9 @@ class FilesClient {
         
         if (!dropZone || !fileInput || !browseBtn) return;
         
-        // Hide upload controls for students
         if (this.app.role !== 'teacher') {
             dropZone.style.display = 'none';
             
-            // Show message for students
             const note = document.createElement('div');
             note.className = 'files-student-note';
             note.textContent = '📌 Only teachers can upload files. Files uploaded by the teacher will appear below.';
@@ -44,19 +38,16 @@ class FilesClient {
             return;
         }
         
-        // Browse button
         browseBtn.addEventListener('click', () => {
             fileInput.click();
         });
         
-        // File input change
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
                 this.uploadFiles(Array.from(e.target.files));
             }
         });
         
-        // Drag and drop
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropZone.classList.add('drag-over');
@@ -94,8 +85,6 @@ class FilesClient {
         const uploadStatus = document.getElementById('uploadStatus');
         
         for (const file of files) {
-            // Check file size before uploading
-            // 10MB for Codespaces, change to 2048 for real LAN
             const maxSize = 10 * 1024 * 1024; // 10MB
             if (file.size > maxSize) {
                 if (uploadStatus) {
@@ -129,12 +118,10 @@ class FilesClient {
                     body: formData
                 });
                 
-                // Check if response is ok
                 if (!response.ok) {
                     throw new Error(`Server error: ${response.status} ${response.statusText}`);
                 }
                 
-                // Check if response is JSON
                 const contentType = response.headers.get('content-type');
                 if (!contentType || !contentType.includes('application/json')) {
                     // Server returned HTML or something else (probably an error page)
@@ -182,7 +169,6 @@ class FilesClient {
         this.files.push(fileInfo);
         this.renderFiles();
         
-        // Show notification
         this.app.log(`${fileInfo.uploadedBy} uploaded: ${fileInfo.originalName}`);
     }
     
@@ -255,11 +241,8 @@ class FilesClient {
     }
     
     downloadFile(file) {
-        // Simple approach: just open the download URL directly
-        // This avoids fetch/blob issues and lets the browser handle it
         const url = `api.php?action=download_file&roomId=${this.app.roomId}&fileId=${file.id}`;
         
-        // Create a hidden link and click it
         const link = document.createElement('a');
         link.href = url;
         link.download = file.originalName;
@@ -267,7 +250,6 @@ class FilesClient {
         document.body.appendChild(link);
         link.click();
         
-        // Clean up after a short delay
         setTimeout(() => {
             document.body.removeChild(link);
         }, 100);

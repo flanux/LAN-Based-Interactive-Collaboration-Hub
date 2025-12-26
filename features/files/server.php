@@ -1,5 +1,4 @@
 <?php
-// features/files/server.php - Handles file operations
 
 require_once __DIR__ . '/../../core/storage.php';
 require_once __DIR__ . '/../../core/eventbus.php';
@@ -13,9 +12,7 @@ class FilesFeature {
         $this->eventBus = new EventBus();
     }
     
-    // Handle file upload
     public function uploadFile($roomId, $username) {
-        // Validate room exists
         if (!$this->storage->roomExists($roomId)) {
             return array(
                 'success' => false,
@@ -23,7 +20,6 @@ class FilesFeature {
             );
         }
         
-        // Check if file was uploaded
         if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
             return array(
                 'success' => false,
@@ -36,8 +32,7 @@ class FilesFeature {
         $fileSize = $file['size'];
         $fileTmpPath = $file['tmp_name'];
         
-        // Validate file size (50MB max)
-        $maxSize = 50 * 1024 * 1024; // 50MB
+        $maxSize = 50 * 1024 * 1024; 
         if ($fileSize > $maxSize) {
             return array(
                 'success' => false,
@@ -45,16 +40,13 @@ class FilesFeature {
             );
         }
         
-        // Create unique filename to avoid conflicts
         $fileExt = pathinfo($fileName, PATHINFO_EXTENSION);
         $baseName = pathinfo($fileName, PATHINFO_FILENAME);
         $uniqueName = $baseName . '_' . time() . '.' . $fileExt;
         
-        // Get room files directory
         $filesDir = __DIR__ . '/../../data/rooms/' . $roomId . '/files/';
         $destination = $filesDir . $uniqueName;
         
-        // Move uploaded file
         if (!move_uploaded_file($fileTmpPath, $destination)) {
             return array(
                 'success' => false,
@@ -62,7 +54,6 @@ class FilesFeature {
             );
         }
         
-        // Create file metadata
         $fileInfo = array(
             'id' => uniqid(),
             'originalName' => $fileName,
@@ -72,21 +63,17 @@ class FilesFeature {
             'uploadedAt' => time()
         );
         
-        // Get current room state
         $state = $this->storage->getRoomState($roomId);
         
-        // Add file to room state
         if (!isset($state['files'])) {
             $state['files'] = array();
         }
         $state['files'][] = $fileInfo;
         
-        // Update room state
         $this->storage->updateRoomState($roomId, array(
             'files' => $state['files']
         ));
         
-        // Broadcast file_uploaded event
         $this->eventBus->emit($roomId, 'file_uploaded', $fileInfo);
         
         return array(
@@ -95,7 +82,6 @@ class FilesFeature {
         );
     }
     
-    // Get list of files in room
     public function getFiles($roomId) {
         if (!$this->storage->roomExists($roomId)) {
             return array(
@@ -113,7 +99,6 @@ class FilesFeature {
         );
     }
     
-    // Download a file
     public function downloadFile($roomId, $fileId) {
         if (!$this->storage->roomExists($roomId)) {
             return array(
@@ -122,11 +107,9 @@ class FilesFeature {
             );
         }
         
-        // Get room state
         $state = $this->storage->getRoomState($roomId);
         $files = isset($state['files']) ? $state['files'] : array();
         
-        // Find file by ID
         $fileInfo = null;
         foreach ($files as $file) {
             if ($file['id'] === $fileId) {
@@ -142,7 +125,6 @@ class FilesFeature {
             );
         }
         
-        // Get file path
         $filePath = __DIR__ . '/../../data/rooms/' . $roomId . '/files/' . $fileInfo['storedName'];
         
         if (!file_exists($filePath)) {
@@ -152,7 +134,6 @@ class FilesFeature {
             );
         }
         
-        // Return file info for download
         return array(
             'success' => true,
             'path' => $filePath,
@@ -161,7 +142,6 @@ class FilesFeature {
         );
     }
     
-    // Delete a file
     public function deleteFile($roomId, $fileId, $username) {
         if (!$this->storage->roomExists($roomId)) {
             return array(
@@ -170,11 +150,9 @@ class FilesFeature {
             );
         }
         
-        // Get room state
         $state = $this->storage->getRoomState($roomId);
         $files = isset($state['files']) ? $state['files'] : array();
         
-        // Find and remove file
         $fileInfo = null;
         $newFiles = array();
         foreach ($files as $file) {
@@ -192,18 +170,15 @@ class FilesFeature {
             );
         }
         
-        // Delete physical file
         $filePath = __DIR__ . '/../../data/rooms/' . $roomId . '/files/' . $fileInfo['storedName'];
         if (file_exists($filePath)) {
             unlink($filePath);
         }
         
-        // Update room state
         $this->storage->updateRoomState($roomId, array(
             'files' => $newFiles
         ));
         
-        // Broadcast file_deleted event
         $this->eventBus->emit($roomId, 'file_deleted', array(
             'fileId' => $fileId,
             'fileName' => $fileInfo['originalName'],

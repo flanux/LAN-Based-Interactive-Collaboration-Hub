@@ -1,0 +1,13 @@
+{
+    "roomId": "3S9HDV",
+    "created": 1766221429,
+    "participants": [
+        {
+            "username": "Teacher",
+            "role": "teacher",
+            "joinedAt": 1766221430
+        }
+    ],
+    "notes": "",
+    "polls": []
+}
