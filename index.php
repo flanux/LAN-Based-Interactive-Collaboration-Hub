@@ -70,11 +70,9 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Store username and role
                     localStorage.setItem('username', username);
                     localStorage.setItem('role', 'teacher');
                     
-                    // Join the room
                     const joinFormData = new FormData();
                     joinFormData.append('action', 'join_room');
                     joinFormData.append('roomId', data.roomId);
@@ -86,7 +84,6 @@
                         body: joinFormData
                     });
                     
-                    // Redirect to room
                     window.location.href = `room.php?id=${data.roomId}`;
                 } else {
                     status.textContent = 'Error: ' + data.error;
@@ -129,11 +126,9 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Store username and role
                     localStorage.setItem('username', username);
                     localStorage.setItem('role', role);
                     
-                    // Redirect to room
                     window.location.href = `room.php?id=${roomCode}`;
                 } else {
                     status.textContent = 'Error: ' + data.error;
@@ -143,7 +138,6 @@
             }
         }
         
-        // Allow Enter key to submit
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 if (document.activeElement.id === 'roomCode' || 

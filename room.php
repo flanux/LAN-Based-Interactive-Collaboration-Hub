@@ -89,7 +89,6 @@
     <script src="features/notes/client.js"></script>
     <script src="features/polls/client.js"></script>
     <script>
-        // Get room ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const roomId = urlParams.get('id');
         
@@ -98,28 +97,21 @@
             window.location.href = 'index.php';
         }
         
-        // Get user info from localStorage
         const username = localStorage.getItem('username') || 'Anonymous';
         const role = localStorage.getItem('role') || 'student';
         
-        // Update UI
         document.getElementById('roomId').textContent = roomId;
         document.getElementById('userInfo').textContent = `${username} (${role})`;
         
-        // Initialize app
         const app = new App(roomId, username, role);
         app.start();
         
-        // Initialize files feature
         const filesClient = new FilesClient(app);
         
-        // Initialize notes feature
         const notesClient = new NotesClient(app);
         
-        // Initialize polls feature
         const pollsClient = new PollsClient(app);
         
-        // Add handler for displaying messages
         app.on('test_message', function(data) {
             const messageDisplay = document.getElementById('messageDisplay');
             if (messageDisplay) {
@@ -145,14 +137,12 @@
                 messageDisplay.appendChild(msgDiv);
                 messageDisplay.scrollTop = messageDisplay.scrollHeight;
                 
-                // Limit messages
                 while (messageDisplay.children.length > 50) {
                     messageDisplay.removeChild(messageDisplay.firstChild);
                 }
             }
         });
         
-        // Message input handler
         const messageInput = document.getElementById('messageInput');
         const sendMessageBtn = document.getElementById('sendMessageBtn');
         
