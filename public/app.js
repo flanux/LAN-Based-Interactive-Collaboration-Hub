@@ -1,4 +1,3 @@
-// public/app.js - Core client application with event bus and polling
 
 class App {
     constructor(roomId, username, role) {
@@ -7,50 +6,41 @@ class App {
         this.role = role;
         this.lastEventId = 0;
         this.isPolling = false;
-        this.pollInterval = 2000; // Poll every 2 seconds
+        this.pollInterval = 2000; 
         this.eventHandlers = {};
         this.connected = false;
     }
     
-    // Start the application
     async start() {
         console.log('Starting app for room:', this.roomId);
         
-        // Set up event handlers
         this.setupEventHandlers();
         
-        // Load initial room state
         await this.loadRoomState();
         
-        // Start polling
         this.startPolling();
         
         console.log('App started successfully');
     }
     
-    // Set up event handlers
     setupEventHandlers() {
-        // Handle room created event
         this.on('room_created', (data) => {
             console.log('Room created:', data);
             this.log('Room created by ' + data.role);
         });
         
-        // Handle user joined event
         this.on('user_joined', (data) => {
             console.log('User joined:', data);
             this.log(data.username + ' (' + data.role + ') joined the room');
             this.updateParticipantCount();
         });
         
-        // Handle test message event
         this.on('test_message', (data) => {
             console.log('Test message received:', data);
             this.log(data.username + ': ' + data.message);
         });
     }
     
-    // Load initial room state and past events
     async loadRoomState() {
         try {
             const response = await fetch(`api.php?action=get_room&roomId=${this.roomId}`);
@@ -60,7 +50,6 @@ class App {
                 console.log('Room state loaded:', data.room);
                 this.updateParticipantCount(data.room.participants.length);
                 
-                // Load all past events
                 await this.loadPastEvents();
             } else {
                 console.error('Failed to load room state:', data.error);
@@ -72,7 +61,6 @@ class App {
         }
     }
     
-    // Load past events (for when joining existing room)
     async loadPastEvents() {
         try {
             const response = await fetch(`api.php?action=get_events&roomId=${this.roomId}`);
@@ -87,7 +75,6 @@ class App {
                         this.lastEventId = event.id;
                     }
                     
-                    // Emit event to handlers (but don't log "joined" for current user)
                     this.emitLocal(event.type, event.data);
                 });
             }
@@ -96,7 +83,6 @@ class App {
         }
     }
     
-    // Start polling for events
     startPolling() {
         if (this.isPolling) return;
         
@@ -104,12 +90,10 @@ class App {
         this.poll();
     }
     
-    // Stop polling
     stopPolling() {
         this.isPolling = false;
     }
     
-    // Poll for new events
     async poll() {
         if (!this.isPolling) return;
         
@@ -120,27 +104,22 @@ class App {
             const data = await response.json();
             
             if (data.success) {
-                // Update connection status
                 if (!this.connected) {
                     this.connected = true;
                     this.updateConnectionStatus(true);
                 }
                 
-                // Process new events
                 if (data.events && data.events.length > 0) {
                     console.log('Received events:', data.events);
                     
                     data.events.forEach(event => {
-                        // Update last event ID
                         if (event.id > this.lastEventId) {
                             this.lastEventId = event.id;
                         }
                         
-                        // Emit event to handlers
                         this.emitLocal(event.type, event.data);
                     });
                     
-                    // Update participant count when someone joins
                     this.updateParticipantCount();
                 }
             } else {
@@ -154,11 +133,9 @@ class App {
             this.updateConnectionStatus(false);
         }
         
-        // Schedule next poll
         setTimeout(() => this.poll(), this.pollInterval);
     }
     
-    // Emit event to server
     async emit(eventType, eventData) {
         try {
             const formData = new FormData();
@@ -184,7 +161,6 @@ class App {
         }
     }
     
-    // Emit event locally (to handlers)
     emitLocal(eventType, eventData) {
         if (this.eventHandlers[eventType]) {
             this.eventHandlers[eventType].forEach(handler => {
@@ -193,7 +169,6 @@ class App {
         }
     }
     
-    // Register event handler
     on(eventType, handler) {
         if (!this.eventHandlers[eventType]) {
             this.eventHandlers[eventType] = [];
@@ -201,7 +176,6 @@ class App {
         this.eventHandlers[eventType].push(handler);
     }
     
-    // Update connection status UI
     updateConnectionStatus(connected) {
         const statusDot = document.getElementById('connectionStatus');
         if (statusDot) {
@@ -210,10 +184,8 @@ class App {
         }
     }
     
-    // Update participant count UI
     async updateParticipantCount(count) {
         if (count === undefined) {
-            // Fetch from server
             try {
                 const response = await fetch(`api.php?action=get_room&roomId=${this.roomId}`);
                 const data = await response.json();
@@ -233,7 +205,6 @@ class App {
         }
     }
     
-    // Log message to event log (debug)
     log(message) {
         const eventLog = document.getElementById('eventLog');
         if (eventLog) {
@@ -245,10 +216,8 @@ class App {
             
             eventLog.appendChild(entry);
             
-            // Auto-scroll to bottom
             eventLog.scrollTop = eventLog.scrollHeight;
             
-            // Limit log entries
             while (eventLog.children.length > 50) {
                 eventLog.removeChild(eventLog.firstChild);
             }
