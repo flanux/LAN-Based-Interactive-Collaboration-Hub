@@ -158,7 +158,7 @@ docker run -p 8000:80 -v $(pwd)/data:/app/data flanux/lan-collab
 │              LAN Network (192.168.x.x)          │
 ├─────────────────────────────────────────────────┤
 │                                                 │
-│  📱 Device 1    📱 Device 2    💻 Device 3     │
+│  📱 Device 1    📱 Device 2    💻 Device 3      │
 │     ↓               ↓               ↓           │
 │     └───────────────┴───────────────┘           │
 │                     ↓                           │
@@ -428,7 +428,6 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 - **Issues:** [GitHub Issues](https://github.com/flanux/LAN-Based-Interactive-Collaboration-Hub/issues)
 - **Discussions:** [GitHub Discussions](https://github.com/flanux/LAN-Based-Interactive-Collaboration-Hub/discussions)
-- **Email:** [Your email if you want]
 
 ---
 
