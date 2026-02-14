@@ -199,9 +199,9 @@ class App {
             }
         }
         
-        const countElement = document.getElementById('participantCount');
+        const countElement = document.getElementById('participantCountDisplay');
         if (countElement) {
-            countElement.textContent = count + ' participant' + (count !== 1 ? 's' : '');
+            countElement.textContent = count + ' Participant' + (count !== 1 ? 's' : '');
         }
     }
     

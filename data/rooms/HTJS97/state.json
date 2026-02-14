@@ -1,0 +1,20 @@
+{
+    "roomId": "HTJS97",
+    "created": 1771065004,
+    "participants": [
+        {
+            "username": "Pankaj",
+            "role": "teacher",
+            "joinedAt": 1771065004
+        },
+        {
+            "username": "Student",
+            "role": "student",
+            "joinedAt": 1771066490
+        }
+    ],
+    "notes": "",
+    "polls": [],
+    "notesUpdatedBy": "Pankaj",
+    "notesUpdatedAt": 1771066441
+}

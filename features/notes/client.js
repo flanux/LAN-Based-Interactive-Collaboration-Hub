@@ -47,9 +47,25 @@ class NotesClient {
             const clearBtn = document.getElementById('clearNotesBtn');
             if (clearBtn) {
                 clearBtn.addEventListener('click', () => {
-                    this.clearNotes();
+                    this.showClearNotesModal();
                 });
             }
+        }
+        
+        // Setup clear notes modal buttons
+        const cancelClearBtn = document.getElementById('cancelClearBtn');
+        const confirmClearBtn = document.getElementById('confirmClearBtn');
+        
+        if (cancelClearBtn) {
+            cancelClearBtn.addEventListener('click', () => {
+                this.hideClearNotesModal();
+            });
+        }
+        
+        if (confirmClearBtn) {
+            confirmClearBtn.addEventListener('click', () => {
+                this.confirmClearNotes();
+            });
         }
     }
     
@@ -108,6 +124,49 @@ class NotesClient {
             }
         } catch (error) {
             console.error('Error saving notes:', error);
+        }
+    }
+    
+    showClearNotesModal() {
+        const modal = document.getElementById('clearNotesModal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+    
+    hideClearNotesModal() {
+        const modal = document.getElementById('clearNotesModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+    
+    async confirmClearNotes() {
+        this.hideClearNotesModal();
+        
+        try {
+            const formData = new FormData();
+            formData.append('action', 'clear_notes');
+            formData.append('roomId', this.app.roomId);
+            formData.append('username', this.app.username);
+            
+            const response = await fetch('api.php', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.textarea.value = '';
+                this.lastContent = '';
+                this.showNotification('Notes cleared successfully', 'success');
+            } else {
+                this.showNotification('Error clearing notes: ' + data.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error clearing notes:', error);
+            this.showNotification('Error clearing notes', 'error');
         }
     }
     
@@ -186,5 +245,49 @@ class NotesClient {
         if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
         if (diff < 86400) return Math.floor(diff / 3600) + ' hr ago';
         return Math.floor(diff / 86400) + ' days ago';
+    }
+    
+    showNotification(message, type = 'info') {
+        const modal = document.getElementById('notificationModal');
+        const titleEl = document.getElementById('notificationTitle');
+        const messageEl = document.getElementById('notificationMessage');
+        const iconEl = document.getElementById('notificationIcon');
+        const closeBtn = document.getElementById('closeNotificationBtn');
+        
+        if (!modal) return;
+        
+        // Set icon and color based on type
+        if (type === 'error') {
+            iconEl.textContent = 'error';
+            iconEl.className = 'material-icons text-2xl text-red-500';
+            titleEl.textContent = 'Error';
+            titleEl.className = 'text-lg font-bold text-slate-900 dark:text-slate-100';
+        } else if (type === 'success') {
+            iconEl.textContent = 'check_circle';
+            iconEl.className = 'material-icons text-2xl text-green-500';
+            titleEl.textContent = 'Success';
+            titleEl.className = 'text-lg font-bold text-slate-900 dark:text-slate-100';
+        } else {
+            iconEl.textContent = 'info';
+            iconEl.className = 'material-icons text-2xl text-blue-500';
+            titleEl.textContent = 'Notification';
+            titleEl.className = 'text-lg font-bold text-slate-900 dark:text-slate-100';
+        }
+        
+        messageEl.textContent = message;
+        modal.style.display = 'flex';
+        
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                modal.style.display = 'none';
+            };
+        }
+        
+        // Close modal when clicking outside
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
     }
 }

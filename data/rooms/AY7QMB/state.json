@@ -1,0 +1,18 @@
+{
+    "roomId": "AY7QMB",
+    "created": 1771056672,
+    "participants": [
+        {
+            "username": "vhv",
+            "role": "teacher",
+            "joinedAt": 1771056672
+        },
+        {
+            "username": "hyu",
+            "role": "student",
+            "joinedAt": 1771056737
+        }
+    ],
+    "notes": "",
+    "polls": []
+}

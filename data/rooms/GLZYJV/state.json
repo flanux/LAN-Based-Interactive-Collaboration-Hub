@@ -1,0 +1,20 @@
+{
+    "roomId": "GLZYJV",
+    "created": 1771052611,
+    "participants": [
+        {
+            "username": "Teacher",
+            "role": "teacher",
+            "joinedAt": 1771052611
+        },
+        {
+            "username": "Student",
+            "role": "student",
+            "joinedAt": 1771052629
+        }
+    ],
+    "notes": "",
+    "polls": [],
+    "notesUpdatedBy": "Teacher",
+    "notesUpdatedAt": 1771052939
+}

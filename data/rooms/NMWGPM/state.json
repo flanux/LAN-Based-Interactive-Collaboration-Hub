@@ -1,0 +1,13 @@
+{
+    "roomId": "NMWGPM",
+    "created": 1771056405,
+    "participants": [
+        {
+            "username": "Teacher",
+            "role": "teacher",
+            "joinedAt": 1771056405
+        }
+    ],
+    "notes": "",
+    "polls": []
+}

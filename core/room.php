@@ -64,6 +64,14 @@ class RoomManager {
         // Get current state
         $state = $this->storage->getRoomState($roomId);
         
+        // If this is the first teacher joining and no creator is set, mark them as the creator
+        if ($role === 'teacher' && !isset($state['createdBy'])) {
+            $state['createdBy'] = $username;
+            $this->storage->updateRoomState($roomId, array(
+                'createdBy' => $username
+            ));
+        }
+        
         // Add participant if not already in list
         $participantExists = false;
         foreach ($state['participants'] as $participant) {

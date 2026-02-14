@@ -31,7 +31,7 @@ class FilesClient {
             dropZone.style.display = 'none';
             
             const note = document.createElement('div');
-            note.className = 'files-student-note';
+            note.className = 'mb-4 p-4 bg-blue-50 dark:bg-blue-950 border-l-4 border-blue-500 rounded-md text-blue-900 dark:text-blue-100 text-sm';
             note.textContent = '📌 Only teachers can upload files. Files uploaded by the teacher will appear below.';
             dropZone.parentNode.insertBefore(note, dropZone);
             
@@ -50,16 +50,16 @@ class FilesClient {
         
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropZone.classList.add('drag-over');
+            dropZone.classList.add('border-primary', 'border-solid', 'bg-primary/10');
         });
         
         dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('drag-over');
+            dropZone.classList.remove('border-primary', 'border-solid', 'bg-primary/10');
         });
         
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropZone.classList.remove('drag-over');
+            dropZone.classList.remove('border-primary', 'border-solid', 'bg-primary/10');
             
             if (e.dataTransfer.files.length > 0) {
                 this.uploadFiles(Array.from(e.dataTransfer.files));
@@ -89,9 +89,7 @@ class FilesClient {
             if (file.size > maxSize) {
                 if (uploadStatus) {
                     uploadStatus.textContent = `Error: ${file.name} is too large (max 10MB on Codespaces). Will work with 2GB files on real LAN!`;
-                    uploadStatus.style.background = '#ffebee';
-                    uploadStatus.style.borderColor = '#e74c3c';
-                    uploadStatus.style.color = '#c0392b';
+                    uploadStatus.className = 'mt-3 text-sm text-red-600 bg-red-50 dark:bg-red-950/30 p-3 rounded border border-red-200 dark:border-red-900';
                     uploadStatus.style.display = 'block';
                 }
                 continue;
@@ -100,9 +98,7 @@ class FilesClient {
             if (uploadStatus) {
                 const sizeMB = (file.size / 1024 / 1024).toFixed(1);
                 uploadStatus.textContent = `Uploading ${file.name} (${sizeMB} MB)... Large files may take several minutes.`;
-                uploadStatus.style.background = '#d5f4e6';
-                uploadStatus.style.borderColor = '#2ecc71';
-                uploadStatus.style.color = '#27ae60';
+                uploadStatus.className = 'mt-3 text-sm text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-950/30 p-3 rounded border border-green-200 dark:border-green-900';
                 uploadStatus.style.display = 'block';
             }
             
@@ -185,7 +181,7 @@ class FilesClient {
         if (!filesList) return;
         
         if (this.files.length === 0) {
-            filesList.innerHTML = '<div class="no-files">No files shared yet</div>';
+            filesList.innerHTML = '<div class="text-center text-slate-400 py-8 text-sm">No files shared yet</div>';
             return;
         }
         
@@ -193,31 +189,31 @@ class FilesClient {
         
         this.files.forEach(file => {
             const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
+            fileItem.className = 'flex items-center gap-4 p-4 border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-800/30 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors mb-3';
             
             const fileIcon = document.createElement('div');
-            fileIcon.className = 'file-icon';
+            fileIcon.className = 'text-3xl min-w-fit';
             fileIcon.textContent = this.getFileIcon(file.originalName);
             
             const fileInfo = document.createElement('div');
-            fileInfo.className = 'file-info';
+            fileInfo.className = 'flex-1 min-w-0';
             
             const fileName = document.createElement('div');
-            fileName.className = 'file-name';
+            fileName.className = 'font-semibold text-slate-900 dark:text-slate-100 truncate';
             fileName.textContent = file.originalName;
             
             const fileMeta = document.createElement('div');
-            fileMeta.className = 'file-meta';
+            fileMeta.className = 'text-sm text-slate-500 dark:text-slate-400 mt-1';
             fileMeta.textContent = `${this.formatFileSize(file.size)} • ${file.uploadedBy} • ${this.formatTime(file.uploadedAt)}`;
             
             fileInfo.appendChild(fileName);
             fileInfo.appendChild(fileMeta);
             
             const fileActions = document.createElement('div');
-            fileActions.className = 'file-actions';
+            fileActions.className = 'flex gap-2 flex-shrink-0';
             
             const downloadBtn = document.createElement('button');
-            downloadBtn.className = 'btn-download';
+            downloadBtn.className = 'bg-primary hover:bg-primary/90 text-zinc-900 font-medium py-1.5 px-3 rounded text-sm transition-colors';
             downloadBtn.textContent = 'Download';
             downloadBtn.onclick = () => this.downloadFile(file);
             
@@ -226,7 +222,7 @@ class FilesClient {
             // Only show delete button for file uploader or teacher
             if (file.uploadedBy === this.app.username || this.app.role === 'teacher') {
                 const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'btn-delete';
+                deleteBtn.className = 'bg-red-500 hover:bg-red-600 text-white font-medium py-1.5 px-3 rounded text-sm transition-colors';
                 deleteBtn.textContent = 'Delete';
                 deleteBtn.onclick = () => this.deleteFile(file);
                 fileActions.appendChild(deleteBtn);

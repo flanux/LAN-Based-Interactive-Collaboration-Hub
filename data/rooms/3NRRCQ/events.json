@@ -1,0 +1,55 @@
+[
+    {
+        "id": 1,
+        "type": "room_created",
+        "data": {
+            "roomId": "3NRRCQ",
+            "role": "teacher"
+        },
+        "timestamp": 1771077220
+    },
+    {
+        "id": 2,
+        "type": "user_joined",
+        "data": {
+            "username": "Teacher",
+            "role": "teacher"
+        },
+        "timestamp": 1771077220
+    },
+    {
+        "id": 3,
+        "type": "test_message",
+        "data": {
+            "username": "Teacher",
+            "message": "hi"
+        },
+        "timestamp": 1771077533
+    },
+    {
+        "id": 4,
+        "type": "user_joined",
+        "data": {
+            "username": "Student",
+            "role": "student"
+        },
+        "timestamp": 1771077549
+    },
+    {
+        "id": 5,
+        "type": "test_message",
+        "data": {
+            "username": "Student",
+            "message": "hello"
+        },
+        "timestamp": 1771077552
+    },
+    {
+        "id": 6,
+        "type": "notes_cleared",
+        "data": {
+            "clearedBy": "Teacher"
+        },
+        "timestamp": 1771077574
+    }
+]

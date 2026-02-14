@@ -1,0 +1,65 @@
+[
+    {
+        "id": 1,
+        "type": "room_created",
+        "data": {
+            "roomId": "ZXTZSS",
+            "role": "teacher"
+        },
+        "timestamp": 1771067624
+    },
+    {
+        "id": 2,
+        "type": "user_joined",
+        "data": {
+            "username": "Paras Adhikari",
+            "role": "teacher"
+        },
+        "timestamp": 1771067624
+    },
+    {
+        "id": 3,
+        "type": "poll_created",
+        "data": {
+            "id": "699059096e94c",
+            "question": "fg",
+            "options": [
+                "gf",
+                "fg"
+            ],
+            "votes": [],
+            "createdBy": "Paras Adhikari",
+            "createdAt": 1771067657,
+            "active": true
+        },
+        "timestamp": 1771067657
+    },
+    {
+        "id": 4,
+        "type": "vote_submitted",
+        "data": {
+            "pollId": "699059096e94c",
+            "username": "Paras Adhikari",
+            "optionIndex": 0
+        },
+        "timestamp": 1771067663
+    },
+    {
+        "id": 5,
+        "type": "test_message",
+        "data": {
+            "username": "Paras Adhikari",
+            "message": "hi"
+        },
+        "timestamp": 1771067676
+    },
+    {
+        "id": 6,
+        "type": "test_message",
+        "data": {
+            "username": "Paras Adhikari",
+            "message": "hi"
+        },
+        "timestamp": 1771067689
+    }
+]

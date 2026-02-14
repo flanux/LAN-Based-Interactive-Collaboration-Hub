@@ -1,0 +1,28 @@
+{
+    "roomId": "ZXTZSS",
+    "created": 1771067624,
+    "participants": [
+        {
+            "username": "Paras Adhikari",
+            "role": "teacher",
+            "joinedAt": 1771067624
+        }
+    ],
+    "notes": "",
+    "polls": [
+        {
+            "id": "699059096e94c",
+            "question": "fg",
+            "options": [
+                "gf",
+                "fg"
+            ],
+            "votes": {
+                "Paras Adhikari": 0
+            },
+            "createdBy": "Paras Adhikari",
+            "createdAt": 1771067657,
+            "active": true
+        }
+    ]
+}

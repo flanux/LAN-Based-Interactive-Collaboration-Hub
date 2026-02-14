@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "type": "room_created",
+        "data": {
+            "roomId": "7ZZMJ9",
+            "role": "teacher"
+        },
+        "timestamp": 1771052567
+    },
+    {
+        "id": 2,
+        "type": "user_joined",
+        "data": {
+            "username": "Teacher",
+            "role": "teacher"
+        },
+        "timestamp": 1771052567
+    }
+]

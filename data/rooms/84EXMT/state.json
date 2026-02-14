@@ -1,0 +1,13 @@
+{
+    "roomId": "84EXMT",
+    "created": 1771064941,
+    "participants": [
+        {
+            "username": "Pankaj",
+            "role": "teacher",
+            "joinedAt": 1771064941
+        }
+    ],
+    "notes": "",
+    "polls": []
+}

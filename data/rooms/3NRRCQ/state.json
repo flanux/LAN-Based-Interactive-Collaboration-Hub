@@ -1,0 +1,21 @@
+{
+    "roomId": "3NRRCQ",
+    "created": 1771077220,
+    "participants": [
+        {
+            "username": "Teacher",
+            "role": "teacher",
+            "joinedAt": 1771077220
+        },
+        {
+            "username": "Student",
+            "role": "student",
+            "joinedAt": 1771077549
+        }
+    ],
+    "notes": "",
+    "polls": [],
+    "createdBy": "Teacher",
+    "notesUpdatedBy": "Teacher",
+    "notesUpdatedAt": 1771077574
+}

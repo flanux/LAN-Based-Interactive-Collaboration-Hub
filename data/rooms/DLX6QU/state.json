@@ -1,0 +1,18 @@
+{
+    "roomId": "DLX6QU",
+    "created": 1771076676,
+    "participants": [
+        {
+            "username": "Teacher",
+            "role": "teacher",
+            "joinedAt": 1771076676
+        },
+        {
+            "username": "Student",
+            "role": "student",
+            "joinedAt": 1771076683
+        }
+    ],
+    "notes": "",
+    "polls": []
+}

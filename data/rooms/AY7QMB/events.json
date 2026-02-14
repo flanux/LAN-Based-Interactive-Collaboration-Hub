@@ -1,0 +1,29 @@
+[
+    {
+        "id": 1,
+        "type": "room_created",
+        "data": {
+            "roomId": "AY7QMB",
+            "role": "teacher"
+        },
+        "timestamp": 1771056672
+    },
+    {
+        "id": 2,
+        "type": "user_joined",
+        "data": {
+            "username": "vhv",
+            "role": "teacher"
+        },
+        "timestamp": 1771056672
+    },
+    {
+        "id": 3,
+        "type": "user_joined",
+        "data": {
+            "username": "hyu",
+            "role": "student"
+        },
+        "timestamp": 1771056737
+    }
+]
